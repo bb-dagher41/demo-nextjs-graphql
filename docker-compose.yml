@@ -24,9 +24,11 @@ services:
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}"
 
-    restart: always
+    # restart: always
     ports:
-      - "3000:3000"
+      - "3000:3000" # webapp
+      - "5433:5432" # postgres db
+      - "5555:5555" # prisma studio
     volumes:
       - ./:/my-project:rw
       - node_modules:/my-project/node_modules # we do this so that we don't mount local node_modules to the container 

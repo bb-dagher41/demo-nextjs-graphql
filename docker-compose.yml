@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGTZ: ${POSTGRES_TIMEZONE}
+    ports:
+      - target: 5432
+        published: ${POSTGRES_ENDPOINT_PORT}
+        protocol: tcp
+        mode: host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  bb_backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile_dev
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DATABASE}"
+
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/my-project:rw
+      - node_modules:/my-project/node_modules # we do this so that we don't mount local node_modules to the container 
+  
+volumes:
+  node_modules:
+  postgres_data:

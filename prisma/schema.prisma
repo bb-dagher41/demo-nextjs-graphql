@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  email     String?  @unique
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  email     String?    @unique
   image     String?
-  role      Role     @default(USER)
+  role      Role       @default(USER)
   bookmarks UserLink[]
+
   @@map("users")
 }
 
 model UserLink {
-  user       User     @relation(fields: [user_id], references: [id])
-  user_id     String
-  link       Link     @relation(fields: [post_id], references: [id])
-  post_id     String
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+  link    Link   @relation(fields: [post_id], references: [id])
+  post_id String
 
   @@id([user_id, post_id])
   @@map("user_links")
@@ -37,14 +38,15 @@ enum Role {
 }
 
 model Link {
-  id          String   @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String     @id @default(uuid())
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
   title       String
   description String
   url         String
-  image_url    String @map("image_url")
+  image_url   String     @map("image_url")
   category    String
   users       UserLink[]
+
   @@map("links")
 }

@@ -1,5 +1,26 @@
 import { objectType, extendType, intArg, stringArg, arg } from "nexus";
 import { User } from "./User";
+import DataLoader from "dataloader";
+import prisma from "../../lib/prisma";
+
+const batchFindUsers = async (ids: string[]) => {
+  const userLinks = await prisma.userLink.findMany({
+    where: {
+      post_id: {in: ids},
+    },
+    include: {
+      user: true,
+    },
+  });
+  const userMap = userLinks.reduce((memo, current) => {
+    memo[current.post_id] = current.user
+    return memo;
+  }, {});
+  
+  return ids.map(id => [userMap[id]] || null);
+}
+
+const userLoader = new DataLoader(batchFindUsers)
 
 export const Link = objectType({
   name: "Link",
@@ -12,16 +33,9 @@ export const Link = objectType({
     t.string("category");
     t.list.field("users", {
       type: User,
-      async resolve(_parent, _args, ctx) {
-        const userLinks = await ctx.prisma.userLink.findMany({
-          where: {
-            post_id: _parent.id,
-          },
-          include: {
-            user: true,
-          },
-        });
-        return (userLinks.length && [userLinks[0].user]) || [];
+      async resolve(_parent, _args, _ctx) {
+        const user = await userLoader.load(_parent.id)
+        return user;
       },
     });
   },
